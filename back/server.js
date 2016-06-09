@@ -72,7 +72,19 @@ var enableCORS = function(req, res, next) {
     res.sendStatus(200);
   }
   else {
-    next();
+    //next();
+    var targetURL = req.header('Target-URL');
+        if (!targetURL) {
+            res.send(500, { error: 'There is no Target-Endpoint header in the request' });
+            return;
+        }
+        request({ url: targetURL + req.url, method: req.method, json: req.body, headers: {'Authorization': req.header('Authorization')} },
+            function (error, response, body) {
+                if (error) {
+                    console.error('error: ' + response.statusCode)
+                }
+//                console.log(body);
+            }).pipe(res);
   }
 };
 // enable CORS!
@@ -108,7 +120,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // pour une expiration fixe : resave:false et rolling:false
-// pour une expiration à fenêtre glissante : resave:true et rolling:true
+// pour une expiration Ã  fenÃªtre glissante : resave:true et rolling:true
 /*app.use(session({
   secret:'secretDCL',
   cookie : {
@@ -134,7 +146,7 @@ require('./server/utils/myPassport')(passport);
 
 
 // pour une expiration fixe : resave:false et rolling:false
-// pour une expiration à fenêtre glissante : resave:true et rolling:true
+// pour une expiration Ã  fenÃªtre glissante : resave:true et rolling:true
 app.use(session({
   secret:'secretMyEvent',
   cookie : {
